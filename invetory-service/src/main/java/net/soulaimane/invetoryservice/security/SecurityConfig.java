@@ -17,6 +17,11 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    private final JwtAuthConverter jwtAuthConverter;
+
+    public SecurityConfig(JwtAuthConverter jwtAuthConverter) {
+        this.jwtAuthConverter = jwtAuthConverter;
+    }
 @Bean
 public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
 return httpSecurity
@@ -24,8 +29,10 @@ return httpSecurity
         .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .csrf(csrf -> csrf.disable())
         .headers(h->h.frameOptions(fo->fo.disable()))
-        .authorizeHttpRequests(ar->ar.requestMatchers("/api/**","/h2-console/**").permitAll())
+        .authorizeHttpRequests(ar->ar.requestMatchers("/h2-console/**").permitAll())
+        //.authorizeHttpRequests(ar->ar.requestMatchers("/api/products/**").hasAuthority("ADMIN"))
         .authorizeHttpRequests(ar->ar.anyRequest().authenticated())
+        .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter)))
         .build();
 
 
